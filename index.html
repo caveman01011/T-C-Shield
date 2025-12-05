@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>RSEScore – Marcus Pixelus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #f5e6d3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .header {
+            text-align: center;
+            color: #8b4513;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            filter: drop-shadow(2px 2px 0px #d4a574);
+        }
+
+        .logo-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 3px 3px 0px #d4a574;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            background: #faf0e6;
+            border: 6px solid #8b4513;
+            box-shadow: 8px 8px 0px #d4a574;
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            background: #e8d4b8;
+            border-bottom: 6px solid #8b4513;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .image-container img.active {
+            display: block;
+            animation: fadeIn 0.3s steps(3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f5e6d3;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: 4px solid #8b4513;
+            font-size: 0.65em;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            font-weight: bold;
+            font-family: 'Press Start 2P', monospace;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px #d4a574;
+            line-height: 1.5;
+        }
+
+        .btn-nav {
+            background: #daa520;
+            color: #000;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background: #cd9a1a;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #d4a574;
+        }
+
+        .btn-nav:disabled {
+            background: #c9b899;
+            color: #8b7355;
+            cursor: not-allowed;
+            box-shadow: 4px 4px 0px #b8a57f;
+        }
+
+        .btn-link {
+            background: #c44536;
+            color: #fff;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-link:hover {
+            background: #a83828;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #d4a574;
+        }
+
+        .counter {
+            font-size: 0.85em;
+            color: #8b4513;
+            font-weight: bold;
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 2px 2px 0px #d4a574;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            background: #faf0e6;
+            border-top: 4px solid #8b4513;
+        }
+
+        .thumbnail {
+            min-width: 80px;
+            height: 80px;
+            border: 4px solid #8b4513;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            overflow: hidden;
+            background: #e8d4b8;
+            box-shadow: 3px 3px 0px #d4a574;
+        }
+
+        .thumbnail:hover {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #d4a574;
+        }
+
+        .thumbnail.active {
+            border-color: #c44536;
+            box-shadow: 0 0 0 4px #daa520;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .footer {
+            text-align: center;
+            color: #8b4513;
+            margin-top: 30px;
+            font-size: 0.55em;
+            max-width: 700px;
+            text-shadow: 2px 2px 0px #d4a574;
+            font-family: 'Press Start 2P', monospace;
+            line-height: 1.8;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .image-container {
+                height: 400px;
+            }
+
+            .controls {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.6em;
+            }
+
+            .logo-text {
+                font-size: 1em;
+            }
+
+            .counter {
+                font-size: 0.7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🏛️</div>
+        <div class="logo-text">RSEScore</div>
+        <div style="margin-top: 10px; font-size: 1.1em;">Village numérique · Marcus Pixelus</div>
+    </div>
+
+    <div class="container">
+        <div class="image-container" id="imageContainer">
+            <img src="assets/marcus1.png" alt="Marcus - Page 1" class="active">
+            <img src="assets/marcus2.png" alt="Marcus - Page 2">
+            <img src="assets/marcus3.png" alt="Marcus - Page 3">
+            <img src="assets/marcus4.png" alt="Marcus - Page 4">
+            <img src="assets/marcus5.png" alt="Marcus - Page 5">
+            <img src="assets/marcus6.jpeg" alt="Marcus - Page 6">
+            <img src="assets/marcus7.jpeg" alt="Marcus - Page 7">
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-nav" id="prevBtn" disabled>◀ Précédent</button>
+            <div class="counter">
+                <span id="currentIndex">1</span> / <span id="totalImages">7</span>
+            </div>
+            <button class="btn btn-nav" id="nextBtn">Suivant ▶</button>
+            <a href="form.html" class="btn btn-link" id="analyzeBtn" style="display: none;">Analyser un site</a>
+        </div>
+
+        <div class="thumbnails" id="thumbnails"></div>
+    </div>
+
+    <div class="footer">
+        Ce site n'enregistre rien de ce que tu écris. Parle toujours à un adulte si tu n'es pas sûr d'un site ou d'une appli.
+    </div>
+
+    <script>
+        const images = document.querySelectorAll('.image-container img');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const currentIndexEl = document.getElementById('currentIndex');
+        const thumbnailsContainer = document.getElementById('thumbnails');
+        
+        let currentIndex = 0;
+        const totalImages = images.length;
+
+        // Create thumbnails
+        images.forEach((img, index) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+            thumb.innerHTML = `<img src="${img.src}" alt="Thumbnail ${index + 1}">`;
+            thumb.addEventListener('click', () => goToImage(index));
+            thumbnailsContainer.appendChild(thumb);
+        });
+
+        const thumbnails = document.querySelectorAll('.thumbnail');
+
+        function updateDisplay() {
+            // Update images
+            images.forEach((img, index) => {
+                img.classList.toggle('active', index === currentIndex);
+            });
+
+            // Update thumbnails
+            thumbnails.forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+
+            // Update counter
+            currentIndexEl.textContent = currentIndex + 1;
+
+            // Update buttons
+            prevBtn.disabled = currentIndex === 0;
+            
+            // Show analyze button on last image
+            if (currentIndex === totalImages - 1) {
+                nextBtn.style.display = 'none';
+                analyzeBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                analyzeBtn.style.display = 'none';
+            }
+        }
+
+        function goToImage(index) {
+            currentIndex = index;
+            updateDisplay();
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < totalImages - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentIndex > 0) {
+                currentIndex--;
+                updateDisplay();
+            } else if (e.key === 'ArrowRight' && currentIndex < totalImages - 1) {
+                currentIndex++;
+                updateDisplay();
+            }
+        });
+
+        // Initialize
+        document.getElementById('totalImages').textContent = totalImages;
+    </script>
+</body>
+</html>

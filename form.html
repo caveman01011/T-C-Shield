@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RSEScore – Prototype de Test</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * {
+    font-family: 'Press Start 2P', cursive;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  body {
+    background-color: #F5DEB3;
+  }
+ .card, .btn, .form-control, textarea, input {
+    border: 3px solid #8B7355 !important;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .card {
+    background-color: #F5DEB3 !important;
+  }
+
+  .btn {
+    background-color: #D4A574 !important;
+    color: #2c1810 !important;
+    border-radius: 0 !important;
+    font-size: 0.6rem;
+    padding: 0.5rem 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn:hover {
+    background-color: #C99A6E !important;
+    transform: translate(2px, 2px);
+  }
+
+  .form-control, textarea, input {
+    background-color: #FFFACD !important;
+    color: #2c1810 !important;
+    border-radius: 0 !important;
+    font-size: 0.6rem;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+    color: #2c1810;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  .alert {
+    border-radius: 0 !important;
+    font-size: 0.6rem;
+    border: 3px solid #8B7355 !important;
+  }
+
+  .accordion-button {
+    font-size: 0.6rem;
+    border-radius: 0 !important;
+  }
+
+  .badge {
+    font-size: 0.5rem;
+    border-radius: 0 !important;
+  }
+  
+    /* Mobile adjustments: larger, more touch-friendly controls */
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            max-width: 100% !important;
+        }
+
+        .card {
+            padding: 0.8rem !important;
+            margin: 0.2rem !important;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+        }
+
+        .form-label {
+            font-size: 0.9rem !important;
+        }
+
+        .form-control, textarea, input {
+            font-size: 1rem !important;
+            padding: 0.75rem !important;
+        }
+
+        textarea#userInput {
+            min-height: 180px !important;
+        }
+
+        .btn {
+            font-size: 0.95rem !important;
+            padding: 0.75rem 1rem !important;
+        }
+
+        .alert {
+            font-size: 0.95rem !important;
+        }
+
+        .accordion-button {
+            font-size: 0.95rem !important;
+        }
+    }
+
+    /* Mascot image fixed bottom-right */
+    #mascot {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        width: 220px;
+        height: auto;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background: transparent;
+        z-index: 1050;
+        box-shadow: none;
+        border-radius: 0;
+        cursor: default;
+    }
+
+    @media (max-width: 576px) {
+        #mascot { width: 160px; right: 8px; bottom: 8px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container py-5">
+    <h1 class="text-center mb-4">T&C Shield</h1>
+    <h1 class="text-center mb-4">Protège-toi des pratiques qui ne respectent pas le RSE !</h1>
+    <p class="text-center mb-4">T&C Shield vous aide à repérer les pratiques anti-RSE dans les conditions d’utilisation afin d’éviter les produits qui ne les respectent pas.</p>
+
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <label for="userInput" class="form-label">Saisir les Conditions Générales</label>
+                    <textarea id="userInput" class="form-control" placeholder="Collez les conditions ou le texte ici" rows="4"></textarea>
+
+                    <div class="d-grid mt-3">
+                        <button id="analyzeBtn" class="btn btn-warning">Analyser</button>
+                    </div>
+
+                    <div id="result" class="mt-4 d-none">
+                        <div id="scoreHeader" class="mb-3">
+                            <div id="scoreDisplay" class="h3"></div>
+                            <div id="marcusSpeech" class="alert alert-warning d-none"></div>
+                        </div>
+
+                        <div id="responseContent" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('📄 index.html script loaded');
+
+// ===============================
+// Simple scoring prototype inline
+// ===============================
+
+async function query(data) {
+	const response = await fetch(
+		"https://router.huggingface.co/v1/chat/completions",
+		{
+			headers: {
+				Authorization: `Bearer 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`,
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify(data),
+		}
+	);
+	const result = await response.json();
+	return result;
+}
+
+// Update loading status when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+        console.log('🎨 DOM loaded, updating status...');
+        const statusDiv = document.getElementById('loadingStatus');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const loadingText = document.getElementById('loadingText');
+
+        // Attach event listener to analyze button
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        if (analyzeBtn) analyzeBtn.addEventListener('click', runAnalysis);
+
+        // Optional: submit on Ctrl+Enter inside textarea
+        const userInputEl = document.getElementById('userInput');
+        if (userInputEl) {
+            userInputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    runAnalysis();
+                }
+            });
+        }
+});
+
+//TODO: Read file input and convert to text
+//TODO: Manipulate user input 
+
+function runAnalysis() {
+    const userInput = document.getElementById("userInput").value;
+    
+    const prompt = `
+    Tu es un auditeur expert évaluant les Conditions Générales pour la transparence, la protection des utilisateurs et la conformité RSE (Responsabilité Sociétale des Entreprises).
+
+Ta tâche:
+Étant donné un texte de conditions générales, l'analyser et retourner un objet JSON avec les champs suivants:
+
+{
+  "global_score": 0-10,
+  "metrics": {
+    "transparency_score": 0-10,
+    "transparency_explanation": "une phrase",
+    "privacy_score": 0-10,
+    "privacy_explanation": "une phrase",
+    "data_collection_score": 0-10,
+    "data_collection_explanation": "une phrase",
+    "user_rights_score": 0-10,
+    "user_rights_explanation": "une phrase",
+    "child_safety_score": 0-10,
+    "child_safety_explanation": "une phrase",
+    "third_parties_score": 0-10,
+    "third_parties_explanation": "une phrase"
+  },
+  "summary": "Une phrase amicale et facile à comprendre pour les enfants expliquant si le site respecte les utilisateurs."
+}
+
+Règles de notation:
+- 10 = excellent, sûr, transparent, respectueux
+- 5 = acceptable mais avec des préoccupations
+- 0 = dangereux, peu clair, abusif ou trompeur
+
+Sois factuel, concis et impartial.
+N'INVENTE PAS de contenu qui n'est pas présent dans le texte. Si l'information est manquante, donne un score bas et dis "information non fournie".
+
+    `;
+
+    // show loading spinner and disable button
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const loadingText = document.getElementById('loadingText');
+    const analyzeBtnEl = document.getElementById('analyzeBtn');
+    if (loadingSpinner) loadingSpinner.classList.remove('visually-hidden');
+    if (loadingText) loadingText.textContent = '⏳ Analyse en cours...';
+    if (analyzeBtnEl) analyzeBtnEl.disabled = true;
+
+    query({
+        messages: [
+            {
+                role: "system",
+                content: prompt
+            },
+            {
+                role: "user",
+                content: userInput
+            }
+        ],
+        model: "deepseek-ai/DeepSeek-V3.2:novita",
+    }).then((response) => {
+        const resultDiv = document.getElementById("result");
+        const responseText = response.choices?.[0]?.message?.content || "No response";
+
+        try {
+            // Extract JSON from markdown code blocks if present
+            let jsonString = responseText;
+            const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+            if (jsonMatch && jsonMatch[1]) {
+                jsonString = jsonMatch[1].trim();
+                console.log('📦 Extracted JSON from markdown code block');
+            }
+
+            // Parse JSON response
+            const jsonResponse = JSON.parse(jsonString);
+
+            // Format and display the response using Bootstrap classes
+            const responseDiv = document.getElementById("responseContent");
+            let htmlContent = '';
+
+            // Global score headline
+            if (jsonResponse.global_score !== undefined) {
+                const scoreClass = jsonResponse.global_score >= 7 ? 'alert-success' : jsonResponse.global_score >= 5 ? 'alert-warning' : 'alert-danger';
+                htmlContent += `<div class="alert ${scoreClass} text-center"><h2 class="mb-0">Score Global: ${jsonResponse.global_score}/10</h2></div>`;
+                document.getElementById('scoreDisplay').textContent = `Score: ${jsonResponse.global_score}/10`;
+            } else {
+                document.getElementById('scoreDisplay').textContent = '';
+            }
+
+            // Metrics loop
+            if (jsonResponse.metrics) {
+                const metricsMap = {
+                    'transparency': { title: '🔍 Transparence', scoreKey: 'transparency_score', explKey: 'transparency_explanation' },
+                    'privacy': { title: '🔒 Confidentialité', scoreKey: 'privacy_score', explKey: 'privacy_explanation' },
+                    'data_collection': { title: '📊 Collecte de Données', scoreKey: 'data_collection_score', explKey: 'data_collection_explanation' },
+                    'user_rights': { title: '👤 Droits des Utilisateurs', scoreKey: 'user_rights_score', explKey: 'user_rights_explanation' },
+                    'child_safety': { title: '👶 Sécurité des Enfants', scoreKey: 'child_safety_score', explKey: 'child_safety_explanation' },
+                    'third_parties': { title: '🔗 Tiers', scoreKey: 'third_parties_score', explKey: 'third_parties_explanation' }
+                };
+
+                                // Render metrics inside a Bootstrap Accordion
+                                htmlContent += `<div class="accordion" id="metricsAccordion">`;
+                                for (const [key, config] of Object.entries(metricsMap)) {
+                                        const score = jsonResponse.metrics[config.scoreKey];
+                                        const explanation = jsonResponse.metrics[config.explKey];
+
+                                        if (score !== undefined && explanation !== undefined) {
+                                                const badgeClass = score >= 7 ? 'bg-success text-white' : score >= 5 ? 'bg-warning text-dark' : 'bg-danger text-white';
+                                                const headerId = `heading-${config.scoreKey}`;
+                                                const collapseId = `collapse-${config.scoreKey}`;
+
+                                                htmlContent += `
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" id="${headerId}">
+                                                        <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                                            <span>${config.title}</span>
+                                                            <span class="badge ${badgeClass} rounded-pill ms-3">${score}/10</span>
+                                                        </button>
+                                                    </h2>
+                                                    <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headerId}" data-bs-parent="#metricsAccordion">
+                                                        <div class="accordion-body">
+                                                            ${explanation}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                `;
+                                        }
+                                }
+                                htmlContent += `</div>`;
+            }
+
+            // Summary
+            if (jsonResponse.summary) {
+                htmlContent += `<div class="alert alert-info mt-3"><strong>📌 Résumé:</strong> ${jsonResponse.summary}</div>`;
+            }
+
+            responseDiv.innerHTML = htmlContent;
+            console.log('✅ JSON response formatted and displayed successfully');
+
+        } catch (parseError) {
+            // If JSON parsing fails, render as markdown
+            console.warn('Could not parse as JSON, rendering as markdown:', parseError);
+            const responseDiv = document.getElementById("responseContent");
+            responseDiv.innerHTML = marked.parse(responseText);
+        }
+
+        // Show result area (use Bootstrap d-none class)
+        resultDiv.classList.remove('d-none');
+    }).catch((error) => {
+        console.error("Error:", error);
+    }).finally(() => {
+        // hide spinner and re-enable button
+        if (loadingSpinner) loadingSpinner.classList.add('visually-hidden');
+        if (loadingText) loadingText.textContent = '✅ Scripts chargés avec succès!';
+        if (analyzeBtnEl) analyzeBtnEl.disabled = false;
+    });
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<!-- Mascot: place a file named `mascot.png` at project root to display here -->
+<img id="mascot" src="assets/marcus_inspyrenet.png" alt="Mascotte" aria-hidden="true">
+
+</body>
+</html>
